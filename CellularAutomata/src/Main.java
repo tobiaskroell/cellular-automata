@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.Scanner;
 
 public class Main extends JPanel {
     static final int MAX_CELLS_PER_ROW = 100;
@@ -7,20 +8,22 @@ public class Main extends JPanel {
     static final int MAX_ROWS = (MAX_CELLS_PER_ROW / 2);
     static final int WINDOW_WIDTH = CELL_SIZE * MAX_CELLS_PER_ROW + 30;
     static final int WINDOW_HEIGHT = CELL_SIZE * MAX_ROWS + 50;
+    static int ruleNumber = 0;
+    static int[] ruleset = new int[8];
 
     public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter rule number: ");
+        ruleNumber = sc.nextInt();
+        sc.close();
+        ruleset = intToBitArray(ruleNumber);
+        System.out.print("Ruleset " + ruleNumber + ": ");
+        for (int bit : ruleset) {
+            System.out.print(bit);
+        }
         createCanvas();
     }
 
-    private static void createCanvas() {
-        JFrame frame = new JFrame("Cellular Automata");
-        Main main = new Main();
-
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        frame.add(main);
-        frame.setVisible(true);
-    }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -79,14 +82,40 @@ public class Main extends JPanel {
     }
 
     private int calculateState(int left, int state, int right) {
-        if (left == 1 && state == 1 && right == 1) return 1;
-        if (left == 1 && state == 1 && right == 0) return 0;
-        if (left == 1 && state == 0 && right == 1) return 1;
-        if (left == 1 && state == 0 && right == 0) return 1;
-        if (left == 0 && state == 1 && right == 1) return 0;
-        if (left == 0 && state == 1 && right == 0) return 1;
-        if (left == 0 && state == 0 && right == 1) return 1;
-        if (left == 0 && state == 0 && right == 0) return 0;
-        return 0;
+        int value = left * 4 + state * 2 + right;
+        return ruleset[7 - value];
+    }
+
+    private static void createCanvas() {
+        JFrame frame = new JFrame("Cellular Automata");
+        Main main = new Main();
+
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        frame.add(main);
+        frame.setVisible(true);
+    }
+
+    public static int[] intToBitArray(int number) {
+        int[] bitArray = new int[8];
+
+        // number >> i shifts the least significant bit (most right bit) of the binary representation of number
+        // i places to the right.
+        // & 1 extracts the least significant bit
+        //
+        // example: number = 13 = 00001101
+        // number >> i = 00001101 // i=0
+        // number >> i & 1 = 00001101 & 00000001 = 1
+        //
+        // number >> i = 00000110 // i=1
+        // number >> i & 1 = 00000110 & 00000110 = 0
+        //
+        // number >> i = 00000011 // i=2
+        // number >> i & 1 = 00000011 & 00000011 = 0
+        //...
+        for (int i = 0; i < 8; i++) {
+            bitArray[7 - i] = (number >> i) & 1;
+        }
+        return bitArray;
     }
 }
