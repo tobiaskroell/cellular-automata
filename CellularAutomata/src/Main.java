@@ -1,10 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.Scanner;
+import java.util.InputMismatchException;
 
 public class Main extends JPanel {
     static final int MAX_CELLS_PER_ROW = 100;
-    static final int CELL_SIZE = 20;
+    static final int CELL_SIZE = 10;
     static final int MAX_ROWS = (MAX_CELLS_PER_ROW / 2);
     static final int WINDOW_WIDTH = CELL_SIZE * MAX_CELLS_PER_ROW + 30;
     static final int WINDOW_HEIGHT = CELL_SIZE * MAX_ROWS + 50;
@@ -12,16 +13,37 @@ public class Main extends JPanel {
     static int[] ruleset = new int[8];
 
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter rule number: ");
-        ruleNumber = sc.nextInt();
-        sc.close();
+        ruleNumber = readUserInput();
         ruleset = intToBitArray(ruleNumber);
         System.out.print("Ruleset " + ruleNumber + ": ");
         for (int bit : ruleset) {
             System.out.print(bit);
         }
         createCanvas();
+    }
+
+    private static int readUserInput() {
+        Scanner sc = new Scanner(System.in);
+        int input = -1;
+        boolean validInput = false;
+
+        while (!validInput) {
+            System.out.print("Enter rule number: ");
+            try {
+                input = sc.nextInt();
+                if (input >= 0 && input <= 255) {
+                    validInput = true;
+                } else {
+                    System.out.println("Invalid input. Please enter a valid integer between 0 and 255.");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter a valid integer between 0 and 255.");
+                sc.next();  // Clear the invalid input from scanner buffer
+            }
+        }
+
+        sc.close();
+        return input;
     }
 
 
@@ -33,14 +55,13 @@ public class Main extends JPanel {
         // Enable anti-aliasing for smoother lines
         cnv.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         cnv.setColor(Color.BLACK); // Set drawing color
-        cnv.setStroke(new BasicStroke(1)); // Set line thickness
+//        cnv.setStroke(new BasicStroke(3)); // Set line thickness
 
         int x = 0;
         int y = 0;
         int cellWidth = 40;
         int cellHeight = 40;
         int currentCellsInRow = 0;
-
         int[] cells = new int[MAX_CELLS_PER_ROW];
         cells[MAX_CELLS_PER_ROW / 2] = 1; // Placing the 1 in the middle of the array
 
@@ -55,6 +76,7 @@ public class Main extends JPanel {
                 }
 
                 if (cells[j] == 1) {
+                    cnv.drawRect(x, y, CELL_SIZE, CELL_SIZE);
                     cnv.fillRect(x, y, CELL_SIZE, CELL_SIZE);
                 }
                 x += CELL_SIZE;
@@ -81,6 +103,14 @@ public class Main extends JPanel {
         }
     }
 
+    /**
+     * Calculates the state of the given cell and returns the new state of the cell for the next generation.
+     *
+     * @param left  The state of the cell to the left of the current cell
+     * @param state The state of the current cell
+     * @param right The state of the cell to the right of the current cell
+     * @return The new state of the cell for the next generation
+     */
     private int calculateState(int left, int state, int right) {
         int value = left * 4 + state * 2 + right;
         return ruleset[7 - value];
@@ -94,25 +124,31 @@ public class Main extends JPanel {
         frame.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         frame.add(main);
         frame.setVisible(true);
+        frame.setAlwaysOnTop(true);
     }
 
+    /**
+     * Returns the bit array representation of the given number.
+     *
+     * @param number The number to convert to a bit array
+     * @return The bit array of the given number
+     */
     public static int[] intToBitArray(int number) {
         int[] bitArray = new int[8];
-
-        // number >> i shifts the least significant bit (most right bit) of the binary representation of number
-        // i places to the right.
-        // & 1 extracts the least significant bit
-        //
-        // example: number = 13 = 00001101
-        // number >> i = 00001101 // i=0
-        // number >> i & 1 = 00001101 & 00000001 = 1
-        //
-        // number >> i = 00000110 // i=1
-        // number >> i & 1 = 00000110 & 00000110 = 0
-        //
-        // number >> i = 00000011 // i=2
-        // number >> i & 1 = 00000011 & 00000011 = 0
-        //...
+//      number >> i: shifts the least significant bit (most right bit) of the binary representation of number
+//      i places to the right.
+//      & 1: extracts the least significant bit
+//
+//      example: number = 13 = 00001101
+//               number >> i = 00001101 // i=0
+//               number >> i & 1 = 00001101 & 00000001 = 1
+//
+//               number >> i = 00000110 // i=1
+//               number >> i & 1 = 00000110 & 00000110 = 0
+//
+//               number >> i = 00000011 // i=2
+//               number >> i & 1 = 00000011 & 00000011 = 0
+//               ...
         for (int i = 0; i < 8; i++) {
             bitArray[7 - i] = (number >> i) & 1;
         }
