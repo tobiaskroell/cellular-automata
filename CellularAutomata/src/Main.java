@@ -55,7 +55,6 @@ public class Main extends JPanel {
         // Enable anti-aliasing for smoother lines
         cnv.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         cnv.setColor(Color.BLACK); // Set drawing color
-//        cnv.setStroke(new BasicStroke(3)); // Set line thickness
 
         int x = 0;
         int y = 0;
@@ -135,23 +134,29 @@ public class Main extends JPanel {
      */
     public static int[] intToBitArray(int number) {
         int[] bitArray = new int[8];
-//      number >> i: shifts the least significant bit (most right bit) of the binary representation of number
-//      i places to the right.
-//      & 1: extracts the least significant bit
-//
-//      example: number = 13 = 00001101
-//               number >> i = 00001101 // i=0
-//               number >> i & 1 = 00001101 & 00000001 = 1
-//
-//               number >> i = 00000110 // i=1
-//               number >> i & 1 = 00000110 & 00000110 = 0
-//
-//               number >> i = 00000011 // i=2
-//               number >> i & 1 = 00000011 & 00000011 = 0
-//               ...
+        // number >> i: shifts the binary representation of number i places to the right.
+        // & 1: extracts the least significant bit of the shifted number.
+        //
+        // example: number = 13 = 00001101 in binary
+        //          i = 0
+        //          number >> i = 00001101
+        //          (number >> i) & 1 = 00001101 & 00000001 = 1
+        //
+        //          i = 1
+        //          number >> i = 00000110
+        //          (number >> i) & 1 = 00000110 & 00000001 = 0
+        //
+        //          i = 2
+        //          number >> i = 00000011
+        //          (number >> i) & 1 = 00000011 & 00000001 = 1
+        //
+        //          i = 3
+        //          number >> i = 00000001
+        //          (number >> i) & 1 = 00000001 & 00000001 = 1
         for (int i = 0; i < 8; i++) {
             bitArray[7 - i] = (number >> i) & 1;
         }
         return bitArray;
     }
+
 }
